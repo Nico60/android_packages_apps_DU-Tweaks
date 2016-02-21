@@ -77,6 +77,7 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
     private static final String CATEGORY_OMNI_RECENTS = "omni_recents";
     private static final String CATEGORY_SLIM_RECENTS = "slim_recents_category";
     private static final String IMMERSIVE_RECENTS = "immersive_recents";
+    private static final String RECENT_MODE = "recent_mode";
 
     private Preference mOmniSwitchSettings;
     private boolean mOmniSwitchInitCalled;
@@ -96,6 +97,7 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
     private ListPreference mRecentPanelExpandedMode;
     private ListPreference mRecentsClearAllLocation;
     private ListPreference mImmersiveRecents;
+    private ListPreference mRecentModePanel;
     private ColorPickerPreference mRecentPanelBgColor;
     private ColorPickerPreference mRecentCardBgColor;
     private ColorPickerPreference mRecentCardTextColor;
@@ -112,8 +114,14 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
         PreferenceScreen prefSet = getPreferenceScreen();
         ContentResolver resolver = getActivity().getContentResolver();
 
-        mRecentsUseOmniSwitch = (SwitchPreference)
-                prefSet.findPreference(RECENTS_USE_OMNISWITCH);
+        mRecentModePanel = (ListPreference) prefSet.findPreference(RECENT_MODE);
+        int mode = Settings.System.getIntForUser(resolver,
+                Settings.System.RECENT_PANEL_MODE, 0, UserHandle.USER_CURRENT);
+        mRecentModePanel.setValue(String.valueOf(mode));
+        mRecentModePanel.setSummary(mRecentModePanel.getEntry());
+        mRecentModePanel.setOnPreferenceChangeListener(this);
+
+        mRecentsUseOmniSwitch = (SwitchPreference) prefSet.findPreference(RECENTS_USE_OMNISWITCH);
 
         try {
             mRecentsUseOmniSwitch.setChecked(Settings.System.getInt(resolver,
@@ -152,7 +160,7 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
                 getContentResolver(), Settings.System.IMMERSIVE_RECENTS, 0)));
         mImmersiveRecents.setSummary(mImmersiveRecents.getEntry());
         mImmersiveRecents.setOnPreferenceChangeListener(this);
-        updateRecents();
+        updateRecentPanel();
     }
 
     @Override
@@ -172,7 +180,14 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         ContentResolver resolver = getActivity().getContentResolver();
 
-        if (preference == mRecentsClearAllLocation) {
+        if (preference.equals(mRecentModePanel)) {
+            int mode = Integer.valueOf((String) newValue);
+            int index = mRecentModePanel.findIndexOfValue((String) newValue);
+            Settings.System.putIntForUser(getActivity().getContentResolver(),
+                    Settings.System.RECENT_PANEL_MODE, mode, UserHandle.USER_CURRENT);
+            mRecentModePanel.setSummary(mRecentModePanel.getEntries()[index]);
+            return true;
+        } else if (preference == mRecentsClearAllLocation) {
             int location = Integer.valueOf((String) newValue);
             int index = mRecentsClearAllLocation.findIndexOfValue((String) newValue);
             Settings.System.putIntForUser(getActivity().getContentResolver(),
@@ -188,7 +203,6 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
         } else if (preference == mUseSlimRecents) {
             Settings.System.putInt(getContentResolver(), Settings.System.USE_SLIM_RECENTS,
                     ((Boolean) newValue) ? 1 : 0);
-            updateRecents();
             return true;
         } else if (preference == mShowRunningTasks) {
             Settings.System.putInt(getContentResolver(), Settings.System.RECENT_SHOW_RUNNING_TASKS,
@@ -269,7 +283,6 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
             Settings.System.putInt(
                     resolver, Settings.System.RECENTS_USE_OMNISWITCH, value ? 1 : 0);
             mOmniSwitchSettings.setEnabled(value);
-            updateRecents();
             return true;
         }
         return false;
@@ -425,24 +438,16 @@ public class Recents extends SettingsPreferenceFragment implements DialogCreatab
         mRecentPanelExpandedMode.setOnPreferenceChangeListener(this);
     }
 
-    private void updateRecents() {
-        boolean slimRecent = Settings.System.getInt(getActivity().getContentResolver(),
-                    Settings.System.USE_SLIM_RECENTS, 0) == 1;
-        boolean omniRecents = Settings.System.getInt(getActivity().getContentResolver(),
-                Settings.System.RECENTS_USE_OMNISWITCH, 0) == 1;
-
-        if (slimRecent) {
-            mSlimRecents.setEnabled(true);
-            mStockRecents.setEnabled(false);
-            mOmniRecents.setEnabled(false);
-        } else if (omniRecents) {
-            mOmniRecents.setEnabled(true);
-            mStockRecents.setEnabled(false);
-            mSlimRecents.setEnabled(false);
-        } else {
-           mSlimRecents.setEnabled(true);
-           mStockRecents.setEnabled(true);
-           mOmniSwitch.setEnabled(true);
+    private void updateRecentPanel(int mode) {
+        if (mode == 0) {
+            mSlimRecents.removePreference(findPreference(CATEGORY_SLIM_RECENTS));
+            mOmniRecents.removePreference(findPreference(CATEGORY_OMNI_RECENTS));
+        } else if (mode == 1) {
+            mStockRecents.removePreference(findPreference(CATEGORY_STOCK_RECENTS));
+            mSlimRecents.removePreference(findPreference(CATEGORY_SLIM_RECENTS));
+        } else if (mode == 2) {
+            mStockRecents.removePreference(findPreference(CATEGORY_STOCK_RECENTS));
+            mOmniRecents.removePreference(findPreference(CATEGORY_OMNI_RECENTS));
         }
     }
 

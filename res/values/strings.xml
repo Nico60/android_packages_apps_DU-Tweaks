@@ -915,4 +915,8 @@
     <string name="keyguard_statusbar_clock_title">Keyguard statusbar clock</string>
     <string name="keyguard_statusbar_clock_summary">Enables the statusbar clock in the keyguard on the left side</string>
 
+    <!-- Recent panel mode -->
+    <string name="recent_panel_mode">Recents applications panel</string>
+    <string name="recent_panel_mode_dialog_title">Select recents applications panel</string>
+
 </resources>

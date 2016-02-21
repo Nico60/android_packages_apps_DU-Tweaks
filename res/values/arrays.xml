@@ -889,6 +889,7 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+
 	<!-- Recent panel -->
     <string-array name="recent_panel_expanded_mode_entries">
         <item>@string/recent_panel_expanded_mode_auto</item>
@@ -902,7 +903,6 @@
         <item>2</item>
     </string-array>
 
-
     <string-array name="lockscreen_shortcuts_launch_type_entries" translatable="false">
         <item>@string/lockscreen_shortcuts_single_tap</item>
         <item>@string/lockscreen_shortcuts_double_tap</item>
@@ -910,6 +910,19 @@
     </string-array>
 
     <string-array name="lockscreen_shortcuts_launch_type_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+	<!-- Recent panel mode -->
+    <string-array name="recent_panel_entries">
+        <item>@string/aosp_recents_title</item>
+        <item>@string/omniswitch_recents_title</item>
+        <item>@string/slim_recents_title</item>
+    </string-array>
+
+    <string-array name="recent_panel_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
