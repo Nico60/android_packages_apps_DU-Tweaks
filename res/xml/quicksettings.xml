@@ -86,6 +86,12 @@
                android:targetClass="org.omnirom.omnistyle.BrowseHeaderActivity" />
     </PreferenceScreen>
 
+    <PreferenceScreen
+        android:key="image_header"
+        android:title="@string/image_header_title"
+        android:summary="@string/image_header_summary"
+        android:dependency="status_bar_custom_header" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

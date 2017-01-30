@@ -24,6 +24,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.RemoteException;
@@ -44,13 +46,16 @@ import java.util.regex.Pattern;
 import java.util.Locale;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
+import com.android.settings.cropper.CropImage;
+import com.android.settings.cropper.CropImageView;
 import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
+import com.android.settings.Utils;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.du.DuUtils;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settings.Utils;
 
 import com.dirtyunicorns.dutweaks.preference.CustomSeekBarPreference;
 
@@ -74,6 +79,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
     private static final String CUSTOM_HEADER_IMAGE_SHADOW = "status_bar_custom_header_shadow";
     private static final String CUSTOM_HEADER_PROVIDER = "custom_header_provider";
     private static final String CUSTOM_HEADER_BROWSE = "custom_header_browse";
+    private static final String IMAGE_HEADER = "image_header";
 
     private ListPreference mTileAnimationStyle;
     private ListPreference mTileAnimationDuration;
@@ -87,6 +93,7 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
     private CustomSeekBarPreference mSysuiQqsCount;
     private CustomSeekBarPreference mHeaderShadow;
     private PreferenceScreen mHeaderBrowse;
+    private PreferenceScreen mImageHeader;
     private String mDaylightHeaderProvider;
     private SwitchPreference mEasyToggle;
     private SwitchPreference mLockQsDisabled;
@@ -221,6 +228,8 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
 
         mHeaderBrowse = (PreferenceScreen) findPreference(CUSTOM_HEADER_BROWSE);
         mHeaderBrowse.setEnabled(isBrowseHeaderAvailable());
+
+        mImageHeader = (PreferenceScreen) findPreference(IMAGE_HEADER);
     }
 
     @Override
@@ -318,6 +327,29 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
         return false;
     }
 
+    @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        if (preference == mImageHeader){
+            cropImageHeader(null);
+            return true;
+        }
+        return super.onPreferenceTreeClick(preference);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == getActivity().RESULT_OK) {
+                //((ImageView) findViewById(R.id.quick_start_cropped_image)).setImageURI(result.getUri());
+                Toast.makeText(getActivity(), "Cropping successful, Sample: " + result.getSampleSize(), Toast.LENGTH_LONG).show();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Toast.makeText(getActivity(), "Cropping failed: " + result.getError(), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private void updatePulldownSummary(int value) {
         Resources res = getResources();
         if (value == 0) {
@@ -401,5 +433,16 @@ public class QuickSettings extends SettingsPreferenceFragment implements OnPrefe
         Intent browse = new Intent();
         browse.setClassName("org.omnirom.omnistyle", "org.omnirom.omnistyle.BrowseHeaderActivity");
         return pm.resolveActivity(browse, 0) != null;
+    }
+    
+    private void cropImageHeader(Uri imageUri) {
+        Intent intent = CropImage.activity(imageUri)
+        .setInitialCropWindowRectangle(new Rect(0, 0, 1200, 192))
+        .setMinCropResultSize(1200,192)
+        .setMaxCropResultSize(1200,192)
+        .setGuidelines(CropImageView.Guidelines.ON)
+        .setMultiTouchEnabled(true)
+        .getIntent(getContext());
+        startActivityForResult(intent, CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE);
     }
 }
