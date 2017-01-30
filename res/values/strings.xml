@@ -538,6 +538,12 @@
     <string name="custom_header_provider_title">Header provider</string>
     <string name="custom_header_browse_title">Browse installed headers</string>
     <string name="custom_header_browse_summary">Long press on any image to use for static mode</string>
+    <string name="image_header_title">Image header</string>
+    <string name="image_header_summary">Set an image for header</string>
+    <string name="app_name">Image Header Cropper</string>
+    <string name="result_image_desc">crop result</string>
+    <string name="main_button_select_image">Select Image</string>
+    <string name="main_activity_desciption">Start image header cropping</string>
 
     <!-- Recents memory bar -->
     <string name="systemui_recents_mem_display_title">Show memory bar</string>

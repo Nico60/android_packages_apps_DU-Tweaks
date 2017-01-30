@@ -31,4 +31,8 @@
 
     <!-- Shortcut picker -->
     <dimen name="shortcut_picker_left_padding">70dip</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">12dp</dimen>
+    <dimen name="activity_vertical_margin">12dp</dimen>
 </resources>
