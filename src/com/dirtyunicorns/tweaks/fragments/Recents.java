@@ -38,6 +38,7 @@ public class Recents extends SettingsPreferenceFragment implements Preference.On
     private static final String RECENTS_CLEAR_ALL_LOCATION = "recents_clear_all_location";
 
     private ListPreference mRecentsClearAllLocation;
+    private SwitchPreference mSlimToggle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,13 @@ public class Recents extends SettingsPreferenceFragment implements Preference.On
         mRecentsClearAllLocation.setValue(String.valueOf(location));
         mRecentsClearAllLocation.setSummary(mRecentsClearAllLocation.getEntry());
         mRecentsClearAllLocation.setOnPreferenceChangeListener(this);
+
+        mSlimToggle = (SwitchPreference) findPreference("use_slim_recents");
+        boolean enabled = Settings.System.getIntForUser(
+                resolver, Settings.System.USE_SLIM_RECENTS, 0,
+                UserHandle.USER_CURRENT) == 1;
+        mSlimToggle.setChecked(enabled);
+        mSlimToggle.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -64,6 +72,13 @@ public class Recents extends SettingsPreferenceFragment implements Preference.On
             Settings.System.putIntForUser(getContentResolver(),
                     Settings.System.RECENTS_CLEAR_ALL_LOCATION, location, UserHandle.USER_CURRENT);
             mRecentsClearAllLocation.setSummary(mRecentsClearAllLocation.getEntries()[index]);
+            return true;
+        } else if (preference == mSlimToggle) {
+            boolean value = (Boolean) newValue;
+            Settings.System.putIntForUser(getActivity().getContentResolver(),
+                    Settings.System.USE_SLIM_RECENTS, value ? 1 : 0,
+                    UserHandle.USER_CURRENT);
+            mSlimToggle.setChecked(value);
             return true;
         }
         return false;
